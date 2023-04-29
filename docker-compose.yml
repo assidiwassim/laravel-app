@@ -1,0 +1,49 @@
+version: "3.9"
+name: laravel-stack
+
+services:
+
+  mysql-service:
+    image: mysql
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_HOST: '%' 
+    restart: always
+    ports:
+      - "3306:3306"
+    #expose:
+      #- "3306"
+    volumes:
+      - mysql-volume:/var/lib/mysql
+
+  phpmyadmin-service:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-container
+    depends_on:
+      - mysql-service
+    environment:
+      PMA_HOST: mysql-service
+      PMA_PORT: 3306
+      #PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+
+
+#Nginx Service
+  nginx-service:
+    image: nginx:alpine
+    container_name: nginx-container
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    volumes:
+      - ./myapp/:/var/www/myapp
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+
+volumes:
+  mysql-volume:
